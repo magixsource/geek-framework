@@ -9,6 +9,7 @@ import gl.linpeng.gf.Function;
 import gl.linpeng.gf.annotation.JsonRequest;
 import gl.linpeng.gf.annotation.NoValidate;
 import gl.linpeng.gf.annotation.PlainTextRequest;
+import gl.linpeng.gf.annotation.Translate;
 import gl.linpeng.gf.base.ServerlessDTO;
 import gl.linpeng.gf.base.ServerlessRequest;
 import gl.linpeng.gf.base.ServerlessResponse;
@@ -156,7 +157,18 @@ public abstract class FunctionController<T extends ServerlessDTO> {
      * @return serverless response
      */
     public ServerlessResponse handler(ServerlessRequest request) {
-        T dto = translate(request);
+        T dto = null;
+        // skip translate dto if translate enabled false
+        if (this.getClass().isAnnotationPresent(Translate.class)) {
+            if (this.getClass().getAnnotation(Translate.class).enabled() == false) {
+                dto = (T) request.getObjectBody();
+            }
+        }
+
+        // save check dto
+        if (dto == null) {
+            dto = translate(request);
+        }
 
         //validation jsr303
         Set<ConstraintViolation<T>> validateMessages = validation(dto);

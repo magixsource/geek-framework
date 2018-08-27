@@ -15,11 +15,13 @@ public class ServerlessRequest {
 
     private final String body;
     private final Map<String, String> headers;
+    private final Object objectBody;
 
 
-    public ServerlessRequest(String body, Map<String, String> headers) {
+    public ServerlessRequest(String body, Map<String, String> headers, Object objectBody) {
         this.body = body;
         this.headers = headers;
+        this.objectBody = objectBody;
     }
 
     public String getBody() {
@@ -30,6 +32,9 @@ public class ServerlessRequest {
         return headers;
     }
 
+    public Object getObjectBody() {
+        return objectBody;
+    }
 
     public static Builder builder() {
         return new Builder();
@@ -71,7 +76,7 @@ public class ServerlessRequest {
             } else if (objectBody != null) {
                 body = JSON.toJSONString(objectBody);
             }
-            return new ServerlessRequest(body, headers);
+            return new ServerlessRequest(body, headers, objectBody);
         }
     }
 
