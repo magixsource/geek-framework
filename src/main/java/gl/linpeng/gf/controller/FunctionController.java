@@ -317,6 +317,14 @@ public abstract class FunctionController<T extends ServerlessDTO> {
     }
 
 
+    public Injector getInjector() {
+        return injector;
+    }
+
+    public void setInjector(Injector injector) {
+        this.injector = injector;
+    }
+
     /**
      * internal controller handler
      *

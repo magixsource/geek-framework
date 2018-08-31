@@ -2,6 +2,7 @@ package gl.linpeng.gf;
 
 import gl.linpeng.gf.config.FunctionConfig;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -37,6 +38,9 @@ public class Function {
     }
 
     public Map<String, Object> getFunctionContext() {
+        if(functionContext == null){
+            functionContext = new HashMap<>();
+        }
         return functionContext;
     }
 
