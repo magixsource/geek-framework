@@ -1,7 +1,6 @@
 package gl.linpeng.gf.plugin.db;
 
 import gl.linpeng.gf.plugin.Plugin;
-import org.javalite.activejdbc.Base;
 
 import java.util.Map;
 
@@ -15,7 +14,7 @@ public class DbPlugin implements Plugin {
 
     @Override
     public void onLoad() {
-        
+
     }
 
     @Override
