@@ -21,6 +21,11 @@ public class FunctionConfig {
     public Cors cors = new Cors();
 
     /**
+     * Plugin names
+     */
+    public String plugins;
+
+    /**
      * Determine is function run in dev mode
      *
      * @return true if function is run in dev mode
@@ -44,6 +49,14 @@ public class FunctionConfig {
 
     public void setCors(Cors cors) {
         this.cors = cors;
+    }
+
+    public String getPlugins() {
+        return plugins;
+    }
+
+    public void setPlugins(String plugins) {
+        this.plugins = plugins;
     }
 
     /**

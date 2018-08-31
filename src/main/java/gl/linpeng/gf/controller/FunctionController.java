@@ -16,6 +16,7 @@ import gl.linpeng.gf.base.ServerlessResponse;
 import gl.linpeng.gf.config.FunctionConfig;
 import gl.linpeng.gf.config.FunctionConfigPlugin;
 import gl.linpeng.gf.config.FunctionDIConfig;
+import gl.linpeng.gf.plugin.PluginManager;
 import gl.linpeng.gf.translator.JsonServerlessRequestTranslator;
 import gl.linpeng.gf.translator.PlainTextServerlessRequestTranslator;
 import gl.linpeng.gf.translator.ServerlessRequestTranslator;
@@ -59,6 +60,11 @@ public abstract class FunctionController<T extends ServerlessDTO> {
     private Injector injector;
 
     private AbstractModule diModule;
+
+    /**
+     * Plugin Manager
+     */
+    private PluginManager pluginManager;
 
     /**
      * request translator
@@ -127,13 +133,22 @@ public abstract class FunctionController<T extends ServerlessDTO> {
             diModule = new FunctionDIConfig();
         }
         this.injector = Guice.createInjector(diModule);
+
+        // plugins
+        pluginManager = new PluginManager();
+        String plugins = this.getFunction().getConfig().getPlugins();
+        if(!StringUtils.isBlank(plugins)){
+            // load plugin needed
+            pluginManager.loadPlugin(plugins);
+        }
+
     }
 
     /**
      * Set DIModule to create injector
-     * You need override this method to setup your di module
+     * You need override this method to setup your di plugin
      *
-     * @return abstract di module
+     * @return abstract di plugin
      */
     protected AbstractModule setDIModule() {
         return new FunctionDIConfig();
