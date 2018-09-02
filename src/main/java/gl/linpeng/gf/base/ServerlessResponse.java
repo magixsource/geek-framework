@@ -1,7 +1,6 @@
 package gl.linpeng.gf.base;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -12,7 +11,7 @@ import java.util.Map;
  **/
 public class ServerlessResponse implements Serializable {
 
-    private Map<String, Object> errors = Collections.emptyMap();
+    private Map<String, Object> errors = null;
 
 
     public Map<String, Object> getErrors() {
