@@ -8,18 +8,12 @@ import gl.linpeng.gf.C;
 import gl.linpeng.gf.Function;
 import gl.linpeng.gf.annotation.JsonRequest;
 import gl.linpeng.gf.annotation.NoValidate;
-import gl.linpeng.gf.annotation.PlainTextRequest;
-import gl.linpeng.gf.annotation.Translate;
-import gl.linpeng.gf.base.ServerlessDTO;
 import gl.linpeng.gf.base.ServerlessRequest;
 import gl.linpeng.gf.base.ServerlessResponse;
 import gl.linpeng.gf.config.FunctionConfig;
 import gl.linpeng.gf.config.FunctionConfigPlugin;
 import gl.linpeng.gf.config.FunctionDIConfig;
 import gl.linpeng.gf.plugin.PluginManager;
-import gl.linpeng.gf.translator.JsonServerlessRequestTranslator;
-import gl.linpeng.gf.translator.PlainTextServerlessRequestTranslator;
-import gl.linpeng.gf.translator.ServerlessRequestTranslator;
 import gl.linpeng.gf.utils.DateTimeUtil;
 import gl.linpeng.gf.validation.FunctionValidatorFactory;
 import org.apache.bval.util.StringUtils;
@@ -41,7 +35,7 @@ import java.util.Set;
  * @since 1.0
  **/
 @JsonRequest
-public abstract class FunctionController<T extends ServerlessDTO> {
+public abstract class FunctionController<T extends ServerlessRequest> {
 
     public static final Logger logger = LoggerFactory.getLogger(FunctionController.class);
 
@@ -67,12 +61,6 @@ public abstract class FunctionController<T extends ServerlessDTO> {
     private PluginManager pluginManager;
 
     /**
-     * request translator
-     */
-    private ServerlessRequestTranslator translator;
-
-
-    /**
      * Determine is Function init
      *
      * @return true if function isn't null
@@ -88,17 +76,6 @@ public abstract class FunctionController<T extends ServerlessDTO> {
     public FunctionController() {
         if (isFunctionInit()) {
             initFunction();
-        }
-        Class tClass = getTClass();
-        logger.debug("tClass {} ", tClass);
-
-        if (this.getClass().isAnnotationPresent(PlainTextRequest.class)) {
-            this.translator = new PlainTextServerlessRequestTranslator();
-        } else if (this.getClass().isAnnotationPresent(JsonRequest.class)) {
-            this.translator = new JsonServerlessRequestTranslator<T>();
-            ((JsonServerlessRequestTranslator) this.translator).settClass(tClass);
-        } else {
-            throw new UnsupportedOperationException("Only JSON & PlainText request supported,sorry.");
         }
     }
 
@@ -137,7 +114,7 @@ public abstract class FunctionController<T extends ServerlessDTO> {
         // plugins
         pluginManager = new PluginManager();
         String plugins = this.getFunction().getConfig().getPlugins();
-        if(!StringUtils.isBlank(plugins)){
+        if (!StringUtils.isBlank(plugins)) {
             // load plugin needed
             pluginManager.loadPlugin(plugins);
         }
@@ -156,41 +133,18 @@ public abstract class FunctionController<T extends ServerlessDTO> {
 
 
     /**
-     * translate request to dto
-     *
-     * @param request serveless request
-     * @return serverless dto
-     */
-    public T translate(ServerlessRequest request) {
-        return (T) this.translator.translate(request);
-    }
-
-    /**
      * Function Common handle pipeline
      *
      * @param request serverless request
      * @return serverless response
      */
-    public ServerlessResponse handler(ServerlessRequest request) {
-        T dto = null;
-        // skip translate dto if translate enabled false
-        if (this.getClass().isAnnotationPresent(Translate.class)) {
-            if (this.getClass().getAnnotation(Translate.class).enabled() == false) {
-                dto = (T) request.getObjectBody();
-            }
-        }
-
-        // save check dto
-        if (dto == null) {
-            dto = translate(request);
-        }
-
+    public ServerlessResponse handler(T request) {
         //validation jsr303
-        Set<ConstraintViolation<T>> validateMessages = validation(dto);
+        Set<ConstraintViolation<T>> validateMessages = validation(request);
         ServerlessResponse response = null;
 
         if (isValid(validateMessages)) {
-            response = internalHandle(dto);
+            response = internalHandle(request);
         } else {
             Map<String, String> errors = Collections.emptyMap();
             if (validateMessages != null && !validateMessages.isEmpty()) {
@@ -201,9 +155,11 @@ public abstract class FunctionController<T extends ServerlessDTO> {
             }
             Map<String, Object> payload = new HashMap<>(1);
             payload.put("errors", errors);
-            response = ServerlessResponse.builder().setStatusCode(C.Http.StatusCode.BAD_REQUEST.v()).setObjectBody(payload).build();
+            response = new ServerlessResponse();
+            response.setErrors(payload);
+            // response = ServerlessResponse.builder().setStatusCode(C.Http.StatusCode.BAD_REQUEST.v()).setObjectBody(payload).build();
         }
-        wrapper(response);
+        // wrapper(response);
         return response;
     }
 
@@ -241,14 +197,14 @@ public abstract class FunctionController<T extends ServerlessDTO> {
      * @param response serverless response
      */
     private void wrapper(ServerlessResponse response) {
-        Map<String, String> headers = response.getHeaders();
+        // Map<String, String> headers = response.getHeaders();
         logger.debug("response {}", JSON.toJSONString(response, false));
 
         // enhance content type
-        warpperContentType(headers);
+        // warpperContentType(headers);
         // enhance  cors
-        warpperCors(headers);
-        warpperTimestamp(headers);
+        // warpperCors(headers);
+        // warpperTimestamp(headers);
 
     }
 
@@ -289,11 +245,11 @@ public abstract class FunctionController<T extends ServerlessDTO> {
      * @param headers serverless response headers
      */
     private void warpperContentType(Map<String, String> headers) {
-        if (this.getClass().isAnnotationPresent(PlainTextRequest.class)) {
-            headers.put(C.Http.contentType, chartsetWarpper(C.Http.ContentType.TEXT, FunctionConfig.Charset));
-        } else {
-            headers.put(C.Http.contentType, chartsetWarpper(C.Http.ContentType.JSON, FunctionConfig.Charset));
-        }
+//        if (this.getClass().isAnnotationPresent(PlainTextRequest.class)) {
+//            headers.put(C.Http.contentType, chartsetWarpper(C.Http.ContentType.TEXT, FunctionConfig.Charset));
+//        } else {
+//            headers.put(C.Http.contentType, chartsetWarpper(C.Http.ContentType.JSON, FunctionConfig.Charset));
+//        }
     }
 
     /**

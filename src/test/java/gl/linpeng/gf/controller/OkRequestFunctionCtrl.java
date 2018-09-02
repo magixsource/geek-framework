@@ -1,17 +1,17 @@
 package gl.linpeng.gf.controller;
 
-import gl.linpeng.gf.base.JsonDTO;
 import gl.linpeng.gf.base.ServerlessResponse;
+import gl.linpeng.gf.model.SimpleRequest;
 
 /**
  * @author lin.peng
  * @since 1.0
  **/
-public class OkRequestFunctionCtrl extends FunctionController<JsonDTO> {
+public class OkRequestFunctionCtrl extends FunctionController<SimpleRequest> {
 
     @Override
-    public ServerlessResponse internalHandle(JsonDTO dto) {
-        return new ServerlessResponse.Builder().setObjectBody(dto).build();
+    public ServerlessResponse internalHandle(SimpleRequest dto) {
+        return new ServerlessResponse();
     }
 
 }
