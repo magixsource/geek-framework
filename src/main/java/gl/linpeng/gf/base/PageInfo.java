@@ -1,7 +1,9 @@
 package gl.linpeng.gf.base;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author lin.peng
@@ -12,7 +14,7 @@ public class PageInfo<T> implements Serializable {
     public Integer page;
     public Integer pageSize;
     public Long total;
-    public List<T> list;
+    public Collection<T> list;
 
     public Integer getPage() {
         return page;
@@ -38,11 +40,20 @@ public class PageInfo<T> implements Serializable {
         this.total = total;
     }
 
-    public List<T> getList() {
+    public Collection<T> getList() {
         return list;
     }
 
-    public void setList(List<T> list) {
+    public void setList(Collection<T> list) {
         this.list = list;
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> retVal = new TreeMap();
+        retVal.put("page", this.getPage());
+        retVal.put("pageSize", this.getPageSize());
+        retVal.put("total", this.getTotal());
+        retVal.put("list", this.getList());
+        return retVal;
     }
 }

@@ -1,6 +1,5 @@
 package gl.linpeng.gf.base;
 
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
