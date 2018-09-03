@@ -35,7 +35,7 @@ import java.util.Set;
  * @since 1.0
  **/
 @JsonRequest
-public abstract class FunctionController<T extends ServerlessRequest> {
+public abstract class FunctionController<T extends ServerlessRequest, R extends ServerlessResponse> {
 
     public static final Logger logger = LoggerFactory.getLogger(FunctionController.class);
 
@@ -89,6 +89,11 @@ public abstract class FunctionController<T extends ServerlessRequest> {
         return tClass;
     }
 
+    public Class<R> getRClass() {
+        Class<R> rClass = (Class<R>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        return rClass;
+    }
+
     /**
      * Function initial
      * init function context
@@ -138,10 +143,10 @@ public abstract class FunctionController<T extends ServerlessRequest> {
      * @param request serverless request
      * @return serverless response
      */
-    public ServerlessResponse handler(T request) {
+    public R handler(T request) {
         //validation jsr303
         Set<ConstraintViolation<T>> validateMessages = validation(request);
-        ServerlessResponse response = null;
+        R response = null;
 
         if (isValid(validateMessages)) {
             response = internalHandle(request);
@@ -155,8 +160,14 @@ public abstract class FunctionController<T extends ServerlessRequest> {
             }
             Map<String, Object> payload = new HashMap<>(1);
             payload.put("errors", errors);
-            response = new ServerlessResponse();
-            response.setErrors(payload);
+            try {
+                response = getRClass().newInstance();
+                response.setErrors(payload);
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
             // response = ServerlessResponse.builder().setStatusCode(C.Http.StatusCode.BAD_REQUEST.v()).setObjectBody(payload).build();
         }
         // wrapper(response);
@@ -287,5 +298,5 @@ public abstract class FunctionController<T extends ServerlessRequest> {
      * @param dto serverless data translate object
      * @return serverless response object
      */
-    public abstract ServerlessResponse internalHandle(T dto);
+    public abstract R internalHandle(T dto);
 }
