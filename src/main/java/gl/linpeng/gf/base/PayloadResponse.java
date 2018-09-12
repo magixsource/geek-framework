@@ -7,7 +7,7 @@ import java.util.Map;
  *
  * @author lin.peng
  */
-public class PayloadResponse extends ServerlessResponse {
+public class PayloadResponse {
 
     private final String message;
     private final Map<String, Object> payload;

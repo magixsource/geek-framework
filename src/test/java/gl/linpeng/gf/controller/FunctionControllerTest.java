@@ -1,6 +1,7 @@
 package gl.linpeng.gf.controller;
 
 import com.alibaba.fastjson.JSON;
+import gl.linpeng.gf.base.ServerlessRequest;
 import gl.linpeng.gf.base.ServerlessResponse;
 import gl.linpeng.gf.model.SimpleRequest;
 import org.junit.Before;
@@ -12,12 +13,15 @@ public class FunctionControllerTest {
 
     private static final Logger logger = LoggerFactory.getLogger(FunctionControllerTest.class);
 
-    SimpleRequest request;
+    ServerlessRequest request;
+    SimpleRequest simpleRequest;
 
     @Before
     public void setUp() throws Exception {
         String jsonText = "{\"id\":\"44\"}";
-        request = JSON.parseObject(jsonText, SimpleRequest.class);
+        simpleRequest = JSON.parseObject(jsonText, SimpleRequest.class);
+        request = new ServerlessRequest(jsonText, null, simpleRequest);
+
     }
 
     @Test

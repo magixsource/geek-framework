@@ -1,12 +1,10 @@
 package gl.linpeng.gf.model;
 
-import gl.linpeng.gf.base.ServerlessRequest;
-
 /**
  * @author lin.peng
  * @since 1.0
  **/
-public class SimpleRequest extends ServerlessRequest {
+public class SimpleRequest {
 
     private Long id;
 

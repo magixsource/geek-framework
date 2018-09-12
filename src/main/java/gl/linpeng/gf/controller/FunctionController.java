@@ -8,12 +8,15 @@ import gl.linpeng.gf.C;
 import gl.linpeng.gf.Function;
 import gl.linpeng.gf.annotation.JsonRequest;
 import gl.linpeng.gf.annotation.NoValidate;
+import gl.linpeng.gf.annotation.PlainTextRequest;
 import gl.linpeng.gf.base.ServerlessRequest;
 import gl.linpeng.gf.base.ServerlessResponse;
 import gl.linpeng.gf.config.FunctionConfig;
 import gl.linpeng.gf.config.FunctionConfigPlugin;
 import gl.linpeng.gf.config.FunctionDIConfig;
 import gl.linpeng.gf.plugin.PluginManager;
+import gl.linpeng.gf.translator.JsonServerlessRequestTranslator;
+import gl.linpeng.gf.translator.ServerlessRequestTranslator;
 import gl.linpeng.gf.utils.DateTimeUtil;
 import gl.linpeng.gf.validation.FunctionValidatorFactory;
 import org.apache.bval.util.StringUtils;
@@ -35,7 +38,7 @@ import java.util.Set;
  * @since 1.0
  **/
 @JsonRequest
-public abstract class FunctionController<T extends ServerlessRequest, R extends ServerlessResponse> {
+public abstract class FunctionController<T extends Object, Q extends ServerlessRequest, R extends ServerlessResponse> {
 
     public static final Logger logger = LoggerFactory.getLogger(FunctionController.class);
 
@@ -61,6 +64,13 @@ public abstract class FunctionController<T extends ServerlessRequest, R extends 
     private PluginManager pluginManager;
 
     /**
+     * request translator
+     */
+    private ServerlessRequestTranslator translator;
+
+    private T dto;
+
+    /**
      * Determine is Function init
      *
      * @return true if function isn't null
@@ -76,6 +86,16 @@ public abstract class FunctionController<T extends ServerlessRequest, R extends 
     public FunctionController() {
         if (isFunctionInit()) {
             initFunction();
+        }
+        Class tClass = getTClass();
+        logger.debug("tClass {} ", tClass);
+
+        if (this.getClass().isAnnotationPresent(PlainTextRequest.class)) {
+        } else if (this.getClass().isAnnotationPresent(JsonRequest.class)) {
+            this.translator = new JsonServerlessRequestTranslator<T>();
+            ((JsonServerlessRequestTranslator) this.translator).settClass(tClass);
+        } else {
+            throw new UnsupportedOperationException("Only JSON & PlainText request supported,sorry.");
         }
     }
 
@@ -143,15 +163,18 @@ public abstract class FunctionController<T extends ServerlessRequest, R extends 
      * @param request serverless request
      * @return serverless response
      */
-    public R handler(T request) {
+    public R handler(Q request) {
+        if (dto == null) {
+            dto = (T) this.translator.translate(request);
+        }
         //validation jsr303
-        Set<ConstraintViolation<T>> validateMessages = validation(request);
+        Set<ConstraintViolation<T>> validateMessages = validation(dto);
         R response = null;
 
         if (isValid(validateMessages)) {
-            response = internalHandle(request);
+            response = internalHandle(dto);
         } else {
-            Map<String, String> errors = Collections.emptyMap();
+            Map<String, Object> errors = Collections.emptyMap();
             if (validateMessages != null && !validateMessages.isEmpty()) {
                 errors = new HashMap<>(validateMessages.size());
                 for (ConstraintViolation<T> c : validateMessages) {
@@ -163,6 +186,9 @@ public abstract class FunctionController<T extends ServerlessRequest, R extends 
             try {
                 response = getRClass().newInstance();
                 response.setErrors(payload);
+                response.setStatusCode(C.Http.StatusCode.BAD_REQUEST.v());
+                response.setBase64Encoded(false);
+                response.setErrors(errors);
             } catch (InstantiationException e) {
                 e.printStackTrace();
             } catch (IllegalAccessException e) {
@@ -170,7 +196,7 @@ public abstract class FunctionController<T extends ServerlessRequest, R extends 
             }
             // response = ServerlessResponse.builder().setStatusCode(C.Http.StatusCode.BAD_REQUEST.v()).setObjectBody(payload).build();
         }
-        // wrapper(response);
+        wrapper(response);
         return response;
     }
 
@@ -208,14 +234,17 @@ public abstract class FunctionController<T extends ServerlessRequest, R extends 
      * @param response serverless response
      */
     private void wrapper(ServerlessResponse response) {
-        // Map<String, String> headers = response.getHeaders();
+        Map<String, String> headers = response.getHeaders();
+        if(headers == null){
+            response.setHeaders(new HashMap());
+        }
         logger.debug("response {}", JSON.toJSONString(response, false));
 
         // enhance content type
-        // warpperContentType(headers);
+        warpperContentType(headers);
         // enhance  cors
-        // warpperCors(headers);
-        // warpperTimestamp(headers);
+        warpperCors(headers);
+        warpperTimestamp(headers);
 
     }
 
@@ -256,11 +285,11 @@ public abstract class FunctionController<T extends ServerlessRequest, R extends 
      * @param headers serverless response headers
      */
     private void warpperContentType(Map<String, String> headers) {
-//        if (this.getClass().isAnnotationPresent(PlainTextRequest.class)) {
-//            headers.put(C.Http.contentType, chartsetWarpper(C.Http.ContentType.TEXT, FunctionConfig.Charset));
-//        } else {
-//            headers.put(C.Http.contentType, chartsetWarpper(C.Http.ContentType.JSON, FunctionConfig.Charset));
-//        }
+        if (this.getClass().isAnnotationPresent(PlainTextRequest.class)) {
+            headers.put(C.Http.contentType, chartsetWarpper(C.Http.ContentType.TEXT, FunctionConfig.Charset));
+        } else {
+            headers.put(C.Http.contentType, chartsetWarpper(C.Http.ContentType.JSON, FunctionConfig.Charset));
+        }
     }
 
     /**
