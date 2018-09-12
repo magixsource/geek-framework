@@ -2,6 +2,7 @@ package gl.linpeng.gf.base;
 
 import com.alibaba.fastjson.JSON;
 
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
@@ -13,14 +14,16 @@ import java.util.Map;
  * @author lin.peng
  * @since 1.0
  **/
-public class ServerlessResponse {
+public class ServerlessResponse implements Serializable {
 
-    private final int statusCode;
-    private final String body;
-    private final Map<String, String> headers;
-    private final boolean isBase64Encoded;
+    private Map<String, Object> errors = null;
 
-    public ServerlessResponse(int statusCode, String body, Map<String, String> headers, boolean isBase64Encoded) {
+    private Map headers;
+    private boolean isBase64Encoded;
+    private int statusCode;
+    private String body;
+
+    public ServerlessResponse(int statusCode, String body, Map headers, boolean isBase64Encoded) {
         this.statusCode = statusCode;
         this.body = body;
         this.headers = headers;
@@ -35,8 +38,28 @@ public class ServerlessResponse {
         return body;
     }
 
-    public Map<String, String> getHeaders() {
+    public Map getHeaders() {
         return headers;
+    }
+
+    public void setHeaders(Map headers) {
+        this.headers = headers;
+    }
+
+    public boolean isBase64Encoded() {
+        return isBase64Encoded;
+    }
+
+    public void setBase64Encoded(boolean base64Encoded) {
+        isBase64Encoded = base64Encoded;
+    }
+
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 
     // API Gateway expects the property to be called "isBase64Encoded" => isIs
@@ -50,10 +73,8 @@ public class ServerlessResponse {
 
     public static class Builder {
 
-        // private static final Loggerger LOG = LogManager.getLogger(ServerlessResponse.Builder.class);
-
         private int statusCode = 200;
-        private Map<String, String> headers =  new HashMap();
+        private Map headers = new HashMap();
         private String rawBody;
         private Object objectBody;
         private byte[] binaryBody;
@@ -121,5 +142,14 @@ public class ServerlessResponse {
             }
             return new ServerlessResponse(statusCode, body, headers, base64Encoded);
         }
+    }
+
+
+    public Map<String, Object> getErrors() {
+        return errors;
+    }
+
+    public void setErrors(Map<String, Object> errors) {
+        this.errors = errors;
     }
 }

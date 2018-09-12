@@ -9,8 +9,6 @@ import gl.linpeng.gf.Function;
 import gl.linpeng.gf.annotation.JsonRequest;
 import gl.linpeng.gf.annotation.NoValidate;
 import gl.linpeng.gf.annotation.PlainTextRequest;
-import gl.linpeng.gf.annotation.Translate;
-import gl.linpeng.gf.base.ServerlessDTO;
 import gl.linpeng.gf.base.ServerlessRequest;
 import gl.linpeng.gf.base.ServerlessResponse;
 import gl.linpeng.gf.config.FunctionConfig;
@@ -18,7 +16,6 @@ import gl.linpeng.gf.config.FunctionConfigPlugin;
 import gl.linpeng.gf.config.FunctionDIConfig;
 import gl.linpeng.gf.plugin.PluginManager;
 import gl.linpeng.gf.translator.JsonServerlessRequestTranslator;
-import gl.linpeng.gf.translator.PlainTextServerlessRequestTranslator;
 import gl.linpeng.gf.translator.ServerlessRequestTranslator;
 import gl.linpeng.gf.utils.DateTimeUtil;
 import gl.linpeng.gf.validation.FunctionValidatorFactory;
@@ -41,7 +38,7 @@ import java.util.Set;
  * @since 1.0
  **/
 @JsonRequest
-public abstract class FunctionController<T extends ServerlessDTO> {
+public abstract class FunctionController<T extends Object, Q extends ServerlessRequest, R extends ServerlessResponse> {
 
     public static final Logger logger = LoggerFactory.getLogger(FunctionController.class);
 
@@ -71,6 +68,7 @@ public abstract class FunctionController<T extends ServerlessDTO> {
      */
     private ServerlessRequestTranslator translator;
 
+    private T dto;
 
     /**
      * Determine is Function init
@@ -93,7 +91,6 @@ public abstract class FunctionController<T extends ServerlessDTO> {
         logger.debug("tClass {} ", tClass);
 
         if (this.getClass().isAnnotationPresent(PlainTextRequest.class)) {
-            this.translator = new PlainTextServerlessRequestTranslator();
         } else if (this.getClass().isAnnotationPresent(JsonRequest.class)) {
             this.translator = new JsonServerlessRequestTranslator<T>();
             ((JsonServerlessRequestTranslator) this.translator).settClass(tClass);
@@ -110,6 +107,11 @@ public abstract class FunctionController<T extends ServerlessDTO> {
     public Class<T> getTClass() {
         Class<T> tClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
         return tClass;
+    }
+
+    public Class<R> getRClass() {
+        Class<R> rClass = (Class<R>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        return rClass;
     }
 
     /**
@@ -137,7 +139,7 @@ public abstract class FunctionController<T extends ServerlessDTO> {
         // plugins
         pluginManager = new PluginManager();
         String plugins = this.getFunction().getConfig().getPlugins();
-        if(!StringUtils.isBlank(plugins)){
+        if (!StringUtils.isBlank(plugins)) {
             // load plugin needed
             pluginManager.loadPlugin(plugins);
         }
@@ -156,43 +158,23 @@ public abstract class FunctionController<T extends ServerlessDTO> {
 
 
     /**
-     * translate request to dto
-     *
-     * @param request serveless request
-     * @return serverless dto
-     */
-    public T translate(ServerlessRequest request) {
-        return (T) this.translator.translate(request);
-    }
-
-    /**
      * Function Common handle pipeline
      *
      * @param request serverless request
      * @return serverless response
      */
-    public ServerlessResponse handler(ServerlessRequest request) {
-        T dto = null;
-        // skip translate dto if translate enabled false
-        if (this.getClass().isAnnotationPresent(Translate.class)) {
-            if (this.getClass().getAnnotation(Translate.class).enabled() == false) {
-                dto = (T) request.getObjectBody();
-            }
-        }
-
-        // save check dto
+    public R handler(Q request) {
         if (dto == null) {
-            dto = translate(request);
+            dto = (T) this.translator.translate(request);
         }
-
         //validation jsr303
         Set<ConstraintViolation<T>> validateMessages = validation(dto);
-        ServerlessResponse response = null;
+        R response = null;
 
         if (isValid(validateMessages)) {
             response = internalHandle(dto);
         } else {
-            Map<String, String> errors = Collections.emptyMap();
+            Map<String, Object> errors = Collections.emptyMap();
             if (validateMessages != null && !validateMessages.isEmpty()) {
                 errors = new HashMap<>(validateMessages.size());
                 for (ConstraintViolation<T> c : validateMessages) {
@@ -201,7 +183,18 @@ public abstract class FunctionController<T extends ServerlessDTO> {
             }
             Map<String, Object> payload = new HashMap<>(1);
             payload.put("errors", errors);
-            response = ServerlessResponse.builder().setStatusCode(C.Http.StatusCode.BAD_REQUEST.v()).setObjectBody(payload).build();
+            try {
+                response = getRClass().newInstance();
+                response.setErrors(payload);
+                response.setStatusCode(C.Http.StatusCode.BAD_REQUEST.v());
+                response.setBase64Encoded(false);
+                response.setErrors(errors);
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            // response = ServerlessResponse.builder().setStatusCode(C.Http.StatusCode.BAD_REQUEST.v()).setObjectBody(payload).build();
         }
         wrapper(response);
         return response;
@@ -242,6 +235,9 @@ public abstract class FunctionController<T extends ServerlessDTO> {
      */
     private void wrapper(ServerlessResponse response) {
         Map<String, String> headers = response.getHeaders();
+        if(headers == null){
+            response.setHeaders(new HashMap());
+        }
         logger.debug("response {}", JSON.toJSONString(response, false));
 
         // enhance content type
@@ -331,5 +327,5 @@ public abstract class FunctionController<T extends ServerlessDTO> {
      * @param dto serverless data translate object
      * @return serverless response object
      */
-    public abstract ServerlessResponse internalHandle(T dto);
+    public abstract R internalHandle(T dto);
 }

@@ -1,7 +1,10 @@
 package gl.linpeng.gf.base;
 
 import com.alibaba.fastjson.JSON;
+import gl.linpeng.gf.base.api.ApiRequest;
 
+import java.io.Serializable;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
 
@@ -11,12 +14,21 @@ import java.util.Map;
  * @author lin.peng
  * @since 1.0
  **/
-public class ServerlessRequest {
+public class ServerlessRequest implements Serializable {
 
     private final String body;
     private final Map<String, String> headers;
     private final Object objectBody;
 
+    public ServerlessRequest(ApiRequest apiRequest) {
+        if(apiRequest.getIsBase64Encoded()){
+            this.body = new String(Base64.getDecoder().decode(apiRequest.getBody()));
+        }else{
+            this.body = apiRequest.getBody();
+        }
+        this.headers = apiRequest.getHeaders();
+        this.objectBody = null;
+    }
 
     public ServerlessRequest(String body, Map<String, String> headers, Object objectBody) {
         this.body = body;

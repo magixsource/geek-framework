@@ -1,15 +1,14 @@
 package gl.linpeng.gf.translator;
 
-import gl.linpeng.gf.base.ServerlessDTO;
 import gl.linpeng.gf.base.ServerlessRequest;
 
 /**
- * Serverless Request translator interface
+ * Serverless request translator
  *
  * @author lin.peng
- * @version 1.0
- */
-public interface ServerlessRequestTranslator<T extends ServerlessDTO> {
+ * @since 1.0
+ **/
+public interface ServerlessRequestTranslator<T extends Object> {
 
     /**
      * translate base request to DTO
