@@ -16,6 +16,6 @@ public class DateTimeUtil {
      * @return time stamp of right now
      */
     public static Long nowTimeStamp() {
-        return new Date().getTime();
+        return System.currentTimeMillis();
     }
 }
