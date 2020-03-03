@@ -110,7 +110,7 @@ public abstract class FunctionController<T extends Object, Q extends ServerlessR
     }
 
     public Class<R> getRClass() {
-        Class<R> rClass = (Class<R>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        Class<R> rClass = (Class<R>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[2];
         return rClass;
     }
 
@@ -235,7 +235,7 @@ public abstract class FunctionController<T extends Object, Q extends ServerlessR
      */
     private void wrapper(ServerlessResponse response) {
         Map<String, String> headers = response.getHeaders();
-        if(headers == null){
+        if (headers == null) {
             response.setHeaders(new HashMap());
         }
         logger.debug("response {}", JSON.toJSONString(response, false));

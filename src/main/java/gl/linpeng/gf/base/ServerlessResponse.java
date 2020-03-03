@@ -23,6 +23,10 @@ public class ServerlessResponse implements Serializable {
     private int statusCode;
     private String body;
 
+    public ServerlessResponse() {
+        this.headers = new HashMap();
+    }
+
     public ServerlessResponse(int statusCode, String body, Map headers, boolean isBase64Encoded) {
         this.statusCode = statusCode;
         this.body = body;
