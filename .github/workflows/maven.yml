@@ -21,4 +21,9 @@ jobs:
       with:
         java-version: 1.8
     - name: Deploy to aliyun
-      run: mvn -B deploy -P geek --file pom.xml
+      uses: simontunnat/action-maven-deploy@v1
+      with:
+        username: ${{ secrets.GEEK_REPO_USERNAME }}
+        password: $${{ secrets.GEEK_REPO_SECRET }}
+        repository: https://packages.aliyun.com/maven/repository/2012569-snapshot-C6Wvk0
+      
