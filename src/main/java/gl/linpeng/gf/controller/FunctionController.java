@@ -119,6 +119,8 @@ public abstract class FunctionController<T extends Object, Q extends ServerlessR
      * init function context
      */
     private void initFunction() {
+        // show slogan
+        // this.showSlogan();
         // init function
         this.function = new Function();
 
@@ -144,6 +146,15 @@ public abstract class FunctionController<T extends Object, Q extends ServerlessR
             pluginManager.loadPlugin(plugins);
         }
 
+    }
+
+    private void showSlogan() {
+        String version = getClass().getPackage().getImplementationVersion();
+        System.out.println("   _____        __     ____                                   __  ");
+        System.out.println("  / ___/__ ___ / /__  / __/______ ___ _  ___ _    _____  ____/ /__");
+        System.out.println(" / (_ / -_) -_)  '_/ / _// __/ _ `/  ' \\/ -_) |/|/ / _ \\/ __/  '_/");
+        System.out.println(" \\___/\\__/\\__/_/\\_\\ /_/ /_/  \\_,_/_/_/_/\\__/|__,__/\\___/_/ /_/\\_\\ ");
+        System.out.println(" :: A lightweight framework focus on function compute :: ("+version+")");
     }
 
     /**

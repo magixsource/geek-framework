@@ -9,7 +9,6 @@
     <version>1.0-SNAPSHOT</version>
 
     <name>geek framework</name>
-    <!-- FIXME change it to the project's website -->
     <url>http://www.example.com</url>
 
     <properties>
@@ -97,25 +96,43 @@
                 </configuration>
             </plugin>
             <!--<plugin>-->
-                <!--<artifactId>maven-assembly-plugin</artifactId>-->
-                <!--<version>3.1.0</version>-->
-                <!--<configuration>-->
-                    <!--<descriptorRefs>-->
-                        <!--<descriptorRef>jar-with-dependencies</descriptorRef>-->
-                    <!--</descriptorRefs>-->
-                    <!--<appendAssemblyId>false-->
-                    <!--</appendAssemblyId> &lt;!&ndash; this is used for not append id to the jar name &ndash;&gt;-->
-                <!--</configuration>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>make-assembly</id> &lt;!&ndash; this is used for inheritance merges &ndash;&gt;-->
-                        <!--<phase>package</phase> &lt;!&ndash; bind to the packaging phase &ndash;&gt;-->
-                        <!--<goals>-->
-                            <!--<goal>single</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
+            <!--<artifactId>maven-assembly-plugin</artifactId>-->
+            <!--<version>3.1.0</version>-->
+            <!--<configuration>-->
+            <!--<descriptorRefs>-->
+            <!--<descriptorRef>jar-with-dependencies</descriptorRef>-->
+            <!--</descriptorRefs>-->
+            <!--<appendAssemblyId>false-->
+            <!--</appendAssemblyId> &lt;!&ndash; this is used for not append id to the jar name &ndash;&gt;-->
+            <!--</configuration>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<id>make-assembly</id> &lt;!&ndash; this is used for inheritance merges &ndash;&gt;-->
+            <!--<phase>package</phase> &lt;!&ndash; bind to the packaging phase &ndash;&gt;-->
+            <!--<goals>-->
+            <!--<goal>single</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--</executions>-->
             <!--</plugin>-->
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>geek</id>
+            <distributionManagement>
+                <repository>
+                    <id>geek-releases</id>
+                    <name>Ali Private Release Repository</name>
+                    <url>https://packages.aliyun.com/maven/repository/2012569-release-howX4t/</url>
+                </repository>
+                <snapshotRepository>
+                    <id>geek-snapshots</id>
+                    <name>Ali Private Snapshot Repository</name>
+                    <url>https://packages.aliyun.com/maven/repository/2012569-snapshot-C6Wvk0/</url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
+    </profiles>
+
 </project>
