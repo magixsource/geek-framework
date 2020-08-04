@@ -24,7 +24,5 @@ jobs:
       uses: whelk-io/maven-settings-xml-action@v10
       with:
         servers: '[{ "id": "geek-snapshots", "username": "${{ secrets.GEEK_REPO_USERNAME }}", "password": "${{ secrets.GEEK_REPO_SECRET }}" }]'
-    - name: Debug
-      run: echo '${{ secrets.GEEK_REPO_USERNAME }} ${{ secrets.GEEK_REPO_SECRET }}'
     - name: Deploy to aliyun
       run: mvn -B deploy -P geek --file pom.xml
