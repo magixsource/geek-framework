@@ -21,10 +21,6 @@ jobs:
       with:
         java-version: 1.8
     - name: Deploy to aliyun
-      uses: simontunnat/action-maven-deploy@v1
+      uses: whelk-io/maven-settings-xml-action@v10
       with:
-        username: ${{ secrets.GEEK_REPO_USERNAME }}
-        password: $${{ secrets.GEEK_REPO_SECRET }}
-        repository: https://packages.aliyun.com/maven/repository/2012569-snapshot-C6Wvk0
-        maven-args: -P geek
-      
+        servers: '[{ "id": "geek", "username": "${{ secrets.GEEK_REPO_USERNAME }}", "password": "${{ secrets.GEEK_REPO_SECRET }}" }]'
