@@ -25,4 +25,4 @@ jobs:
       with:
         servers: '[{ "id": "geek", "username": "${{ secrets.GEEK_REPO_USERNAME }}", "password": "${{ secrets.GEEK_REPO_SECRET }}" }]'
     - name: Deploy to aliyun
-      run: mvn deploy -P geek
+      run: mvn -B deploy -P geek --file pom.xml
