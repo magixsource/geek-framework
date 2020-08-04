@@ -20,7 +20,9 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - name: Deploy to aliyun
+    - name: config setting.xml
       uses: whelk-io/maven-settings-xml-action@v10
       with:
         servers: '[{ "id": "geek", "username": "${{ secrets.GEEK_REPO_USERNAME }}", "password": "${{ secrets.GEEK_REPO_SECRET }}" }]'
+    - name: Deploy to aliyun
+      run: mvn deploy -P geek
