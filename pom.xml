@@ -16,11 +16,11 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <fastjson.version>1.2.83</fastjson.version>
-        <slf4j.version>1.7.21</slf4j.version>
+        <slf4j.version>1.7.25</slf4j.version>
         <bval.version>1.1.2</bval.version>
         <auth0.version>3.4.0</auth0.version>
         <injector.version>2.3.0</injector.version>
-        <validation.version>1.1.0.Final</validation.version>
+        <validation.version>2.0.1.Final</validation.version>
     </properties>
 
     <dependencies>
